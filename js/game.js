@@ -18,7 +18,8 @@ const GemMatchGame = {
     state: {
         grid: [],
         luckyColor: null,          // 改为null，等待玩家选择
-        touchCount: 0,
+        touchCount: 0,          // 【保留】累计碰数（用于内部计算和存档）
+        currentGain: 0,         // 【新增】本次操作获得的碰数（用于显示）
         spareGems: 0,
         remainingBoxes: 10,
         totalGemsCollected: 0,
@@ -335,24 +336,20 @@ const GemMatchGame = {
     
     // 执行单抽
     _performSingleDraw() {
-        this.addGameLog('--- 执行单抽 ---', 'action');
-        
-        this.state.initialTouchCount = this.state.touchCount;
-        const initialSpareGems = this.state.spareGems;
-        
-        // 执行游戏循环
-        this._runGameCycle();
-        
-        // 记录结果
-        const touchGained = this.state.touchCount - this.state.initialTouchCount;
-        const spareGemsGained = this.state.spareGems - initialSpareGems;
-        
-        this.addGameLog(`单抽完成，本轮获得碰数：${touchGained}`, 'action');
-        this.addGameLog(`本轮获得备用宝石：${spareGemsGained}`, 'action');
-        this.addGameLog(`当前状态：碰数 ${this.state.touchCount}，备用宝石 ${this.state.spareGems}`, 'action');
-        
-        this._saveGame();
-    },
+       this.addGameLog('--- 执行单抽 ---', 'action');
+       // 1. 记录开始前的累计碰数
+       const touchBefore = this.state.touchCount;
+       const initialSpareGems = this.state.spareGems;
+       // 2. 执行游戏循环
+       this._runGameCycle();
+       // 3. 计算本次获得的碰数并更新状态
+       this.state.currentGain = this.state.touchCount - touchBefore; // 计算差值
+       const spareGemsGained = this.state.spareGems - initialSpareGems;
+       // 4. 记录日志（日志可以同时展示累计和本次获得）
+       this.addGameLog(`单抽完成！本次获得碰数：${this.state.currentGain}`, 'action');
+       this.addGameLog(`累计碰数：${this.state.touchCount}， 本次获得备用宝石：${spareGemsGained}`, 'action');
+       this._saveGame();
+   }
     
     // 执行十连抽
     _performTenDraw() {
@@ -387,9 +384,9 @@ const GemMatchGame = {
         }
         
         this.addGameLog('开始十连抽游戏循环...', 'action');
-        
-        const initialTouchCount = this.state.touchCount;
-        const initialSpareGems = this.state.spareGems;
+       // 1. 记录十连开始前的累计碰数
+       const touchBefore = this.state.touchCount;
+       const initialSpareGems = this.state.spareGems;
         
         // 十连抽不改变幸运色，使用当前选择的
         this.addGameLog(`使用当前幸运色：${this.config.colors[this.state.luckyColor - 1]}`, 'lucky');
@@ -408,11 +405,12 @@ const GemMatchGame = {
             await this._delay(100);
         }
         
-        const touchGained = this.state.touchCount - initialTouchCount;
+        // 2. 十轮循环结束后，计算总获得
+        this.state.currentGain = this.state.touchCount - touchBefore; // 计算十连总差值
         const spareGemsGained = this.state.spareGems - initialSpareGems;
-        
+        // 3. 更新日志显示
         this.addGameLog('════ 十连抽完成 ════', 'action');
-        this.addGameLog(`十轮总获得碰数：${touchGained}`, 'action');
+        this.addGameLog(`本次十连总获得碰数：${this.state.currentGain}`, 'action');
         this.addGameLog(`十轮总获得备用宝石：${spareGemsGained}`, 'action');
         this.addGameLog(`当前总碰数：${this.state.touchCount}`, 'action');
         this.addGameLog(`当前备用宝石：${this.state.spareGems}`, 'action');
@@ -621,6 +619,7 @@ const GemMatchGame = {
             grid: [],
             luckyColor: null,
             touchCount: 0,
+            currentGain: 0,
             spareGems: 0,
             remainingBoxes: this.config.initBoxes,
             totalGemsCollected: 0,
@@ -647,7 +646,7 @@ const GemMatchGame = {
     },
     
     _updateUI() {
-        if (this.elements.touchCount) this.elements.touchCount.textContent = this.state.touchCount;
+        if (this.elements.touchCount) this.elements.touchCount.textContent = this.state.currentGain;
         if (this.elements.spareGems) this.elements.spareGems.textContent = this.state.spareGems;
         if (this.elements.remainingBoxes) this.elements.remainingBoxes.textContent = this.state.remainingBoxes;
         
