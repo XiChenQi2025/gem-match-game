@@ -1,0 +1,556 @@
+/* 移动端优先的响应式设计 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    color: #f1f1f1;
+    min-height: 100vh;
+    padding: 15px;
+    line-height: 1.5;
+}
+
+#game-container {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ===== 顶部状态栏（简化版：两个项目）===== */
+.status-bar {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    padding: 15px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.status-item {
+    text-align: center;
+    min-width: 120px;
+}
+
+.status-label {
+    font-size: 0.85rem;
+    color: #a5b4fc;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.status-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+}
+
+#wish-color-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.color-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 8px currentColor;
+}
+
+/* ===== 幸运色选择器 ===== */
+.color-selector-section {
+    background: rgba(40, 40, 70, 0.7);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.color-selector-section h3 {
+    color: #6ee7b7;
+    margin-bottom: 10px;
+}
+
+.color-options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.color-option {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+}
+
+.color-option:hover {
+    transform: scale(1.1);
+}
+
+.color-option.selected {
+    border-color: gold;
+    box-shadow: 0 0 15px gold;
+    transform: scale(1.1);
+}
+
+.selected-color-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    font-size: 1.1rem;
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(30, 30, 60, 0.5);
+    border-radius: 10px;
+}
+
+.selected-color-box {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 10px currentColor;
+}
+
+/* ===== 主游戏区 ===== */
+.game-main {
+    background: rgba(30, 30, 60, 0.7);
+    border-radius: 20px;
+    padding: 25px 20px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+h1 {
+    color: #6ee7b7;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    text-shadow: 0 2px 10px rgba(110, 231, 183, 0.3);
+}
+
+.grid-section {
+    margin-bottom: 30px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 12px;
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 1/1;
+    margin: 0 auto;
+    background: rgba(20, 20, 50, 0.8);
+    padding: 15px;
+    border-radius: 15px;
+    border: 3px solid #4a4a6d;
+}
+
+.grid-cell {
+    background: rgba(40, 40, 80, 0.9);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #6b7280;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.grid-cell.filled {
+    border-style: solid;
+    border-color: #0ea5e9;
+    background: rgba(30, 40, 80, 0.95);
+    box-shadow: inset 0 0 15px rgba(14, 165, 233, 0.3);
+}
+
+.grid-cell.lucky {
+    border-color: gold;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+/* ===== 九宫格蒙版效果 ===== */
+.grid-cell.masked {
+    background: linear-gradient(145deg, #4a4a6d, #3a3a5d) !important;
+    border: 2px dashed #6b7280 !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.grid-cell.masked::after {
+    content: "?";
+    font-size: 2rem;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.7);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.gem-img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 6px currentColor);
+    transition: transform 0.2s;
+}
+
+/* ===== 操作按钮区 ===== */
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 18px;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.primary-btn {
+    background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+    color: white;
+}
+
+.secondary-btn {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+}
+
+.reset-btn {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: white;
+}
+
+.confirm-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.action-btn:active {
+    transform: scale(0.98);
+}
+
+.action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ===== 游戏未开始时禁用抽奖按钮 ===== */
+.action-btn.disabled-by-state {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: linear-gradient(135deg, #6b7280, #4b5563) !important;
+}
+
+.btn-icon {
+    font-size: 1.4rem;
+}
+
+.btn-text {
+    flex-grow: 1;
+    text-align: center;
+}
+
+/* ===== 游戏日志区 ===== */
+.log-section {
+    background: rgba(20, 20, 40, 0.8);
+    border-radius: 15px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.log-header h2 {
+    color: #a5b4fc;
+    font-size: 1.3rem;
+}
+
+.small-btn {
+    padding: 8px 15px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.log-container {
+    height: 700px; /* 加长的日志区 */
+    overflow-y: auto;
+    background: rgba(10, 10, 20, 0.7);
+    border-radius: 10px;
+    padding: 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+
+.log-entry {
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    border-left: 4px solid;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.log-time {
+    color: #9ca3af;
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.log-text {
+    color: #f1f1f1;
+}
+
+/* ===== 日志类型颜色 ===== */
+.log-welcome { border-left-color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+.log-lucky { border-left-color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
+.log-fullhouse { border-left-color: #8b5cf6; background: rgba(139, 92, 246, 0.1); }
+.log-three { border-left-color: #10b981; background: rgba(16, 185, 129, 0.1); }
+.log-pair { border-left-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+.log-supplement { border-left-color: #0ea5e9; background: rgba(14, 165, 233, 0.1); }
+.log-error { border-left-color: #dc2626; background: rgba(220, 38, 38, 0.1); }
+.log-action { border-left-color: #8b5cf6; background: rgba(139, 92, 246, 0.1); }
+
+/* ===== 预览区 ===== */
+.preview-section {
+    background: rgba(30, 30, 60, 0.7);
+    border-radius: 15px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.preview-header h3 {
+    color: #a5b4fc;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    min-height: 80px;
+    background: rgba(20, 20, 50, 0.5);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.preview-gem {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 4px currentColor);
+    animation: float 2s infinite ease-in-out;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+/* ===== 游戏规则 ===== */
+.game-rules {
+    background: rgba(20, 20, 40, 0.8);
+    border-radius: 15px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+details summary {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #6ee7b7;
+    cursor: pointer;
+    padding: 10px;
+    list-style: none;
+}
+
+details summary::-webkit-details-marker {
+    display: none;
+}
+
+details summary:after {
+    content: "⬇️";
+    float: right;
+    transition: transform 0.3s;
+}
+
+details[open] summary:after {
+    transform: rotate(180deg);
+}
+
+.rules-content {
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(10, 10, 20, 0.5);
+    border-radius: 10px;
+    font-size: 0.95rem;
+}
+
+.rules-content ol {
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+.rules-content li {
+    margin-bottom: 8px;
+    padding-left: 5px;
+}
+
+/* ===== 宝石动画效果 ===== */
+@keyframes gemRemove {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0.3); }
+}
+.gem-removing {
+    animation: gemRemove 0.7s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes gemAppear {
+    0% { opacity: 0; transform: scale(0.5); }
+    70% { transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
+}
+.gem-appearing {
+    animation: gemAppear 0.8s ease-out forwards;
+}
+
+@keyframes floatUpFade {
+    0% { opacity: 0; transform: translateY(20px); }
+    20% { opacity: 1; transform: translateY(0); }
+    80% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-20px); }
+}
+.global-notification {
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.9), rgba(255, 140, 0, 0.9));
+    color: #1a1a2e;
+    padding: 18px 35px;
+    border-radius: 50px;
+    font-size: 1.8rem;
+    font-weight: bold;
+    z-index: 2000;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    border: 3px solid white;
+    animation: floatUpFade 3.5s ease-in-out forwards;
+    pointer-events: none;
+    white-space: nowrap;
+}
+.notification-fullhouse {
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.9), rgba(139, 92, 246, 0.9));
+    color: white;
+}
+.notification-three {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.9), rgba(16, 185, 129, 0.9));
+    color: white;
+}
+.notification-pair {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(248, 113, 113, 0.9));
+    color: white;
+}
+
+/* ===== 响应式调整 ===== */
+@media (max-width: 600px) {
+    .status-bar {
+        gap: 20px;
+    }
+    
+    .status-item {
+        min-width: 100px;
+    }
+    
+    .grid {
+        max-width: 350px;
+        gap: 10px;
+        padding: 12px;
+    }
+    
+    .action-btn {
+        padding: 16px;
+        font-size: 1.1rem;
+    }
+    
+    .log-container {
+        height: 250px;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .grid {
+        max-width: 300px;
+    }
+    
+    .status-value {
+        font-size: 1.3rem;
+    }
+    
+    .color-options {
+        gap: 8px;
+    }
+    
+    .color-option {
+        width: 38px;
+        height: 38px;
+    }
+}
