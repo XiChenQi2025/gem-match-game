@@ -121,7 +121,7 @@ const GemMatchGame = {
         // 动画结束后自动移除元素
         setTimeout(() => {
             if (notification.parentNode) notification.parentNode.removeChild(notification);
-        }, 2500);
+        }, 4600);
     },
     
     // 初始化九宫格（空状态 + 蒙版）
@@ -453,7 +453,7 @@ const GemMatchGame = {
     async _runGameCycle() {
         // 第1步: 判断幸运色 (只执行一次)
         await this._step1_checkLuckyColor();
-        await this._delay(100);
+        await this._delay(240);
         
         // 第2-5步: 进入“消除-补充”循环
         let eliminationOccurred;
@@ -468,25 +468,25 @@ const GemMatchGame = {
             // 第2步: 判断全家福
             if (await this._step2_checkFullHouse()) {
                 eliminationOccurred = true;
-                await this._delay(300); // 给动画时间
+                await this._delay(600); // 给动画时间
             }
             
             // 第3步: 判断三连 (仅在全家福未发生后判断，因为全家福会清空棋盘)
             if (!eliminationOccurred && await this._step3_checkThreeInARow()) {
                 eliminationOccurred = true;
-                await this._delay(300);
+                await this._delay(480);
             }
             
             // 第4步: 判断对子 (仅在前两者都未发生后判断)
             if (!eliminationOccurred && await this._step4_checkPairs()) {
                 eliminationOccurred = true;
-                await this._delay(300);
+                await this._delay(480);
             }
             
             // 第5步: 如果有消除发生，或者有备用宝石，就补充
             if ((eliminationOccurred || this.state.spareGems > 0) && this._hasEmptyCells()) {
                 await this._step5_supplementGems();
-                await this._delay(300); // 给填充动画时间
+                await this._delay(600); // 给填充动画时间
             }
             
             // 更新UI显示当前状态
@@ -668,7 +668,7 @@ const GemMatchGame = {
                         this.state.grid[pos.row][pos.col] = 0;
                         this.state.checkedForLucky[pos.row][pos.col] = false;
                         resolve();
-                    }, 350);
+                    }, 720);
                 } else {
                     this.state.grid[pos.row][pos.col] = 0;
                     this.state.checkedForLucky[pos.row][pos.col] = false;
