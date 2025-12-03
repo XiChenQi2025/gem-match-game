@@ -305,7 +305,7 @@ const GemMatchGame = {
         for (let row = 0; row < this.config.gridSize; row++) {
             for (let col = 0; col < this.config.gridSize; col++) {
                 const gemColor = this.state.grid[row][col];
-                if (gemColor > 0 && gemColor === this.state.luckyColor && this.state.checkedForLucky[row][col]) {
+                if (gemColor > 0 && gemColor === this.state.luckyColor && !this.state.checkedForLucky[row][col]) {
                     luckyCount++;
                     this.state.checkedForLucky[row][col] = true;
                     if (gemColor > 0) {
