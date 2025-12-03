@@ -242,6 +242,21 @@ const GemMatchGame = {
     _checkAnyPossibleMatch() {
         const grid = this.state.grid;
         const size = this.config.gridSize;
+
+        const colorSet = new Set();
+        
+        //检查全家福
+        for (let row = 0; row < size; row++) {
+            for (let col = 0; col < size; col++) {
+                const gemColor = grid[row][col];
+                if (gemColor > 0) {
+                    colorSet.add(gemColor);
+                    if (colorSet.size === 9) {
+                    return true;
+                    }
+                }
+            }
+        }
         
         // 检查行三连
         for (let row = 0; row < size; row++) {
@@ -290,7 +305,7 @@ const GemMatchGame = {
         for (let row = 0; row < this.config.gridSize; row++) {
             for (let col = 0; col < this.config.gridSize; col++) {
                 const gemColor = this.state.grid[row][col];
-                if (gemColor > 0 && gemColor === this.state.luckyColor && !this.state.checkedForLucky[row][col]) {
+                if (gemColor > 0 && gemColor === this.state.luckyColor && this.state.checkedForLucky[row][col]) {
                     luckyCount++;
                     this.state.checkedForLucky[row][col] = true;
                     if (gemColor > 0) {
