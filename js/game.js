@@ -286,12 +286,16 @@ const GemMatchGame = {
     
     async _stepLuckyColor() {
         let luckyCount = 0;
+        const gemForLucky = [];
         for (let row = 0; row < this.config.gridSize; row++) {
             for (let col = 0; col < this.config.gridSize; col++) {
                 const gemColor = this.state.grid[row][col];
                 if (gemColor > 0 && gemColor === this.state.luckyColor && !this.state.checkedForLucky[row][col]) {
                     luckyCount++;
                     this.state.checkedForLucky[row][col] = true;
+                    if (gemColor > 0) {
+                    gemForLucky.push({row, col});
+                    }
                 }
             }
         }
@@ -300,7 +304,10 @@ const GemMatchGame = {
             this.state.currentGain += luckyCount;
             this.state.spareGems += luckyCount;
             this.addGameLog(`发现 ${luckyCount} 个幸运色宝石，碰数 +${luckyCount}，备用宝石 +${luckyCount}`, 'lucky');
+            await this._removeGemsWithAnimation(gemForLucky);
+            return true;
         }
+        return false;
     },
     
     async _stepFullHouse() {
